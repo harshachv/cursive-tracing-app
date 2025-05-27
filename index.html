@@ -2,15 +2,17 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
   <title>Cursive Tracing App</title>
   <link href="https://fonts.googleapis.com/css2?family=Great+Vibes&display=swap" rel="stylesheet">
   <style>
-    body {
-      font-family: Arial, sans-serif;
+    html, body {
       margin: 0;
       padding: 20px;
+      font-family: Arial, sans-serif;
       background-color: #f0f0f0;
+      overscroll-behavior: none;
+      touch-action: none;
     }
     .container {
       max-width: 800px;
@@ -32,6 +34,7 @@
       margin: 0 auto;
       background-image: linear-gradient(to bottom, transparent 24px, rgba(0,0,0,0.05) 25px, transparent 26px);
       background-size: 100% 50px;
+      touch-action: none;
     }
     .background-text {
       font-family: 'Great Vibes', cursive;
@@ -127,20 +130,25 @@
 
     canvas.addEventListener("mouseup", () => drawing = false);
     canvas.addEventListener("mouseleave", () => drawing = false);
-
     canvas.addEventListener("mousemove", draw);
 
     canvas.addEventListener("touchstart", e => {
+      e.preventDefault();
       drawing = true;
       const rect = canvas.getBoundingClientRect();
       const x = e.touches[0].clientX - rect.left;
       const y = e.touches[0].clientY - rect.top;
       ctx.beginPath();
       ctx.moveTo(x, y);
-    });
+    }, { passive: false });
 
     canvas.addEventListener("touchend", () => drawing = false);
-    canvas.addEventListener("touchmove", e => draw(e.touches[0]));
+    canvas.addEventListener("touchcancel", () => drawing = false);
+
+    canvas.addEventListener("touchmove", e => {
+      e.preventDefault();
+      draw(e.touches[0]);
+    }, { passive: false });
 
     function draw(e) {
       if (!drawing) return;
@@ -199,6 +207,7 @@
           total++;
         }
       }
+
       const score = total ? Math.round((match / total) * 100) : 0;
       document.getElementById("score").innerText = `Accuracy: ${score}%`;
 
