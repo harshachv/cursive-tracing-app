@@ -42,7 +42,7 @@
     }
     .background-text {
       font-family: 'Great Vibes', cursive;
-      font-size: 300px;
+      font-size: 80px;
       color: rgba(0, 0, 0, 0.2);
       position: absolute;
       top: 50%;
@@ -120,7 +120,15 @@
       const text = practiceItems[index];
       backgroundDiv.innerText = text;
       select.value = index;
+      resizeBackgroundFont(text);
       clearCanvas();
+    }
+
+    function resizeBackgroundFont(text) {
+      const container = document.getElementById('canvas-container');
+      const canvasHeight = container.offsetHeight;
+      let fontSize = canvasHeight * 0.8;
+      backgroundDiv.style.fontSize = `${fontSize}px`;
     }
 
     canvas.addEventListener("mousedown", (e) => {
@@ -187,11 +195,14 @@
       bgCanvas.width = canvas.width;
       bgCanvas.height = canvas.height;
       const bgCtx = bgCanvas.getContext('2d');
-      bgCtx.font = '300px "Great Vibes"';
+
+      const bgText = backgroundDiv.innerText;
+      const fontSize = parseFloat(window.getComputedStyle(backgroundDiv).fontSize);
+      bgCtx.font = `${fontSize}px 'Great Vibes'`;
       bgCtx.fillStyle = 'rgba(0,0,0,0.8)';
       bgCtx.textAlign = 'center';
       bgCtx.textBaseline = 'middle';
-      bgCtx.fillText(backgroundDiv.innerText, canvas.width/2, canvas.height/2);
+      bgCtx.fillText(bgText, canvas.width/2, canvas.height/2);
 
       const userData = ctx.getImageData(0, 0, canvas.width, canvas.height).data;
       const bgData = bgCtx.getImageData(0, 0, canvas.width, canvas.height).data;
