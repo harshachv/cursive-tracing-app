@@ -8,57 +8,50 @@
   <style>
     html, body {
       margin: 0;
-      padding: 20px;
+      padding: 10px;
       font-family: Arial, sans-serif;
       background-color: #f0f0f0;
       overscroll-behavior: none;
       touch-action: none;
     }
     .container {
-      max-width: 800px;
-      margin: 0 auto;
+      max-width: 1000px;
+      margin: auto;
       background: white;
       padding: 20px;
       border-radius: 12px;
       box-shadow: 0 0 10px rgba(0,0,0,0.1);
     }
-    .controls {
-      display: flex;
-      gap: 10px;
-      flex-wrap: wrap;
-      margin-bottom: 20px;
-    }
     canvas {
       border: 1px solid #ccc;
       display: block;
       margin: 0 auto;
-      background-image: linear-gradient(to bottom, transparent 24px, rgba(0,0,0,0.05) 25px, transparent 26px);
-      background-size: 100% 50px;
       touch-action: none;
+    }
+    .controls, .actions {
+      display: flex;
+      justify-content: center;
+      gap: 10px;
+      flex-wrap: wrap;
+      margin: 15px 0;
+    }
+    #canvas-container {
+      position: relative;
+      width: 100%;
+      max-width: 900px;
+      height: 300px;
+      margin: 0 auto;
     }
     .background-text {
       font-family: 'Great Vibes', cursive;
-      font-size: 60px;
-      color: rgba(0, 0, 0, 0.2);
+      font-size: 180px;
+      color: rgba(0, 0, 0, 0.15);
       position: absolute;
       top: 50%;
       left: 50%;
       transform: translate(-50%, -50%);
       pointer-events: none;
       white-space: nowrap;
-    }
-    #canvas-container {
-      position: relative;
-      width: 100%;
-      max-width: 700px;
-      height: 200px;
-      margin: 0 auto;
-    }
-    .actions {
-      margin-top: 10px;
-      display: flex;
-      justify-content: center;
-      gap: 10px;
     }
   </style>
 </head>
@@ -72,7 +65,7 @@
 
     <div id="canvas-container">
       <div id="background" class="background-text">A</div>
-      <canvas id="canvas" width="700" height="200"></canvas>
+      <canvas id="canvas" width="900" height="300"></canvas>
     </div>
 
     <div class="actions">
@@ -92,14 +85,11 @@
     let currentIndex = 0;
 
     const practiceItems = [
-      ...'ABCDEFGHIJKLMNOPQRSTUVWXYZ'.split(''),
-      ...'abcdefghijklmnopqrstuvwxyz'.split(''),
+      ..."ABCDEFGHIJKLMNOPQRSTUVWXYZ",
+      ..."abcdefghijklmnopqrstuvwxyz",
       "apple","ball","cat","dog","elephant","fish","goat","hat","ice","juice",
       "kite","lion","monkey","nest","orange","pen","queen","rat","sun","tree",
-      "umbrella","van","whale","xylophone","yarn","zebra","friend","school",
-      "teacher","practice","cursive","letter","word","sentence","write",
-      "handwriting","learn","draw","trace","marker","notebook","paper",
-      "happy","smile","joy","peace","play","study","work","smart","neat","clear"
+      "umbrella","van","whale","xylophone","yarn","zebra"
     ];
 
     function updateSelectOptions() {
@@ -110,6 +100,20 @@
         option.text = item;
         select.appendChild(option);
       });
+    }
+
+    function drawGridLines() {
+      const lineHeight = canvas.height / 3;
+      ctx.save();
+      ctx.strokeStyle = "#ddd";
+      ctx.lineWidth = 1;
+      for (let i = 1; i < 3; i++) {
+        ctx.beginPath();
+        ctx.moveTo(0, i * lineHeight);
+        ctx.lineTo(canvas.width, i * lineHeight);
+        ctx.stroke();
+      }
+      ctx.restore();
     }
 
     function showItem(index) {
@@ -167,6 +171,7 @@
 
     function clearCanvas() {
       ctx.clearRect(0, 0, canvas.width, canvas.height);
+      drawGridLines();
       ctx.beginPath();
       document.getElementById("score").innerText = "";
     }
@@ -186,7 +191,7 @@
       bgCanvas.width = canvas.width;
       bgCanvas.height = canvas.height;
       const bgCtx = bgCanvas.getContext('2d');
-      bgCtx.font = '60px "Great Vibes"';
+      bgCtx.font = '180px "Great Vibes"';
       bgCtx.fillStyle = 'rgba(0,0,0,0.8)';
       bgCtx.textAlign = 'center';
       bgCtx.textBaseline = 'middle';
