@@ -2,57 +2,67 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Cursive Tracing App</title>
   <link href="https://fonts.googleapis.com/css2?family=Great+Vibes&display=swap" rel="stylesheet">
   <style>
-    html, body {
-      margin: 0;
-      padding: 10px;
+    body {
       font-family: Arial, sans-serif;
+      margin: 0;
+      padding: 20px;
       background-color: #f0f0f0;
-      overscroll-behavior: none;
       touch-action: none;
     }
     .container {
-      max-width: 1000px;
-      margin: auto;
+      max-width: 900px;
+      margin: 0 auto;
       background: white;
       padding: 20px;
       border-radius: 12px;
       box-shadow: 0 0 10px rgba(0,0,0,0.1);
     }
+    .controls {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+      margin-bottom: 20px;
+    }
     canvas {
       border: 1px solid #ccc;
       display: block;
       margin: 0 auto;
+      background-image: repeating-linear-gradient(
+        to bottom,
+        transparent,
+        transparent 49px,
+        rgba(0, 0, 0, 0.1) 50px
+      );
+      background-size: 100% 50px;
       touch-action: none;
     }
-    .controls, .actions {
-      display: flex;
-      justify-content: center;
-      gap: 10px;
-      flex-wrap: wrap;
-      margin: 15px 0;
+    .background-text {
+      font-family: 'Great Vibes', cursive;
+      font-size: 300px;
+      color: rgba(0, 0, 0, 0.2);
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -55%);
+      pointer-events: none;
+      white-space: nowrap;
     }
     #canvas-container {
       position: relative;
       width: 100%;
-      max-width: 900px;
-      height: 300px;
+      max-width: 800px;
+      height: 400px;
       margin: 0 auto;
     }
-    .background-text {
-      font-family: 'Great Vibes', cursive;
-      font-size: 600px; /* Placeholder, will be dynamically adjusted */
-      color: rgba(0, 0, 0, 0.15);
-      position: absolute;
-      top: 50%;
-      left: 50%;
-      transform: translate(-50%, -50%);
-      pointer-events: none;
-      white-space: nowrap;
-      line-height: 1;
+    .actions {
+      margin-top: 10px;
+      display: flex;
+      justify-content: center;
+      gap: 10px;
     }
   </style>
 </head>
@@ -66,7 +76,7 @@
 
     <div id="canvas-container">
       <div id="background" class="background-text">A</div>
-      <canvas id="canvas" width="900" height="300"></canvas>
+      <canvas id="canvas" width="800" height="400"></canvas>
     </div>
 
     <div class="actions">
@@ -86,11 +96,14 @@
     let currentIndex = 0;
 
     const practiceItems = [
-      ..."ABCDEFGHIJKLMNOPQRSTUVWXYZ",
-      ..."abcdefghijklmnopqrstuvwxyz",
+      ...'ABCDEFGHIJKLMNOPQRSTUVWXYZ'.split(''),
+      ...'abcdefghijklmnopqrstuvwxyz'.split(''),
       "apple","ball","cat","dog","elephant","fish","goat","hat","ice","juice",
       "kite","lion","monkey","nest","orange","pen","queen","rat","sun","tree",
-      "umbrella","van","whale","xylophone","yarn","zebra"
+      "umbrella","van","whale","xylophone","yarn","zebra","friend","school",
+      "teacher","practice","cursive","letter","word","sentence","write",
+      "handwriting","learn","draw","trace","marker","notebook","paper",
+      "happy","smile","joy","peace","play","study","work","smart","neat","clear"
     ];
 
     function updateSelectOptions() {
@@ -103,70 +116,47 @@
       });
     }
 
-    function drawGridLines() {
-      const lineHeight = canvas.height / 3;
-      ctx.save();
-      ctx.strokeStyle = "#ddd";
-      ctx.lineWidth = 1;
-      for (let i = 1; i < 3; i++) {
-        ctx.beginPath();
-        ctx.moveTo(0, i * lineHeight);
-        ctx.lineTo(canvas.width, i * lineHeight);
-        ctx.stroke();
-      }
-      ctx.restore();
-    }
-
     function showItem(index) {
       const text = practiceItems[index];
       backgroundDiv.innerText = text;
       select.value = index;
-      adjustFontSize();
       clearCanvas();
-    }
-
-    function adjustFontSize() {
-      const canvasHeight = canvas.height;
-      backgroundDiv.style.fontSize = `${canvasHeight * 2}px`;
     }
 
     canvas.addEventListener("mousedown", (e) => {
       drawing = true;
       const rect = canvas.getBoundingClientRect();
-      const x = e.clientX - rect.left;
-      const y = e.clientY - rect.top;
       ctx.beginPath();
-      ctx.moveTo(x, y);
+      ctx.moveTo(e.clientX - rect.left, e.clientY - rect.top);
     });
 
     canvas.addEventListener("mouseup", () => drawing = false);
     canvas.addEventListener("mouseleave", () => drawing = false);
+
     canvas.addEventListener("mousemove", draw);
 
     canvas.addEventListener("touchstart", e => {
-      e.preventDefault();
       drawing = true;
       const rect = canvas.getBoundingClientRect();
-      const x = e.touches[0].clientX - rect.left;
-      const y = e.touches[0].clientY - rect.top;
       ctx.beginPath();
-      ctx.moveTo(x, y);
+      ctx.moveTo(e.touches[0].clientX - rect.left, e.touches[0].clientY - rect.top);
     }, { passive: false });
 
     canvas.addEventListener("touchend", () => drawing = false);
     canvas.addEventListener("touchcancel", () => drawing = false);
-
     canvas.addEventListener("touchmove", e => {
+      if (!drawing) return;
+      const rect = canvas.getBoundingClientRect();
+      const touch = e.touches[0];
+      draw({ clientX: touch.clientX, clientY: touch.clientY });
       e.preventDefault();
-      draw(e.touches[0]);
     }, { passive: false });
 
     function draw(e) {
       if (!drawing) return;
       const rect = canvas.getBoundingClientRect();
-      const x = (e.clientX || e.pageX) - rect.left;
-      const y = (e.clientY || e.pageY) - rect.top;
-
+      const x = e.clientX - rect.left;
+      const y = e.clientY - rect.top;
       ctx.lineWidth = 3;
       ctx.lineCap = "round";
       ctx.strokeStyle = "#000";
@@ -178,7 +168,6 @@
 
     function clearCanvas() {
       ctx.clearRect(0, 0, canvas.width, canvas.height);
-      drawGridLines();
       ctx.beginPath();
       document.getElementById("score").innerText = "";
     }
@@ -198,9 +187,7 @@
       bgCanvas.width = canvas.width;
       bgCanvas.height = canvas.height;
       const bgCtx = bgCanvas.getContext('2d');
-
-      const fontSize = canvas.height * 2;
-      bgCtx.font = `${fontSize}px 'Great Vibes'`;
+      bgCtx.font = '300px "Great Vibes"';
       bgCtx.fillStyle = 'rgba(0,0,0,0.8)';
       bgCtx.textAlign = 'center';
       bgCtx.textBaseline = 'middle';
@@ -214,20 +201,15 @@
       for (let i = 0; i < userData.length; i += 4) {
         const isUserDrawn = userData[i+3] > 50;
         const isBgLetter = bgData[i+3] > 50;
-        if (isUserDrawn && isBgLetter) {
-          match++;
-        }
-        if (isBgLetter) {
-          total++;
-        }
+        if (isUserDrawn && isBgLetter) match++;
+        if (isBgLetter) total++;
       }
-
       const score = total ? Math.round((match / total) * 100) : 0;
       document.getElementById("score").innerText = `Accuracy: ${score}%`;
 
       setTimeout(() => {
         nextItem();
-      }, 1500);
+      }, 2000);
     }
 
     document.addEventListener("DOMContentLoaded", () => {
